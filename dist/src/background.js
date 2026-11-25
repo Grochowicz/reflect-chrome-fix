@@ -11,15 +11,15 @@
   var require_crypto = __commonJS(() => {
   });
 
-  // empty:/Users/ronald/github/reflect/reflect-chrome/node_modules/node-fetch/browser.js
+  // empty:/home/eric/github/reflect-chrome-fix/node_modules/node-fetch/browser.js
   var require_browser = __commonJS(() => {
   });
 
-  // empty:/Users/ronald/github/reflect/reflect-chrome/node_modules/util/util.js
+  // empty:/home/eric/github/reflect-chrome-fix/node_modules/util/util.js
   var require_util = __commonJS(() => {
   });
 
-  // empty:/Users/ronald/github/reflect/reflect-chrome/node_modules/string_decoder/lib/string_decoder.js
+  // empty:/home/eric/github/reflect-chrome-fix/node_modules/string_decoder/lib/string_decoder.js
   var require_string_decoder = __commonJS(() => {
   });
 
@@ -23387,6 +23387,33 @@
   }
 
   // build/storage.js
+  var __awaiter4 = function(thisArg, _arguments, P2, generator) {
+    function adopt(value) {
+      return value instanceof P2 ? value : new P2(function(resolve) {
+        resolve(value);
+      });
+    }
+    return new (P2 || (P2 = Promise))(function(resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e2) {
+          reject(e2);
+        }
+      }
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e2) {
+          reject(e2);
+        }
+      }
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
   function getStorage() {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.get(null, (storage5) => {
@@ -23431,18 +23458,19 @@
     });
   }
   function addToWhitelist(url, minutes) {
-    getStorage().then((storage5) => {
-      let whitelistedSites = storage5.whitelistedSites;
-      let expiry = addMinutes(new Date(), minutes);
-      whitelistedSites[url] = expiry.toJSON();
-      setStorage({whitelistedSites}).then(() => {
+    return __awaiter4(this, void 0, void 0, function* () {
+      return getStorage().then((storage5) => {
+        let whitelistedSites = storage5.whitelistedSites;
+        let expiry = addMinutes(new Date(), minutes);
+        whitelistedSites[url] = expiry.toJSON();
         console.log(`${url} added to whitelisted sites`);
+        return setStorage({whitelistedSites});
       });
     });
   }
 
   // build/nn.js
-  var __awaiter4 = function(thisArg, _arguments, P2, generator) {
+  var __awaiter5 = function(thisArg, _arguments, P2, generator) {
     function adopt(value) {
       return value instanceof P2 ? value : new P2(function(resolve) {
         resolve(value);
@@ -23638,7 +23666,7 @@
       this.json_url = chrome.runtime.getURL("res/models/" + modelName + "/tokenizer.json");
     }
     load_from_json() {
-      return __awaiter4(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         return fetch(this.json_url).then((response) => response.json()).then((jsonString) => JSON.parse(jsonString)).then((json2) => json2.config.word_index).then((wordMappingString) => {
           this.wordMap = JSON.parse(wordMappingString);
         });
@@ -23699,7 +23727,7 @@
       this.loadModel(this.modelName);
     }
     predict(intent) {
-      return __awaiter4(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         const tokens = this.tokenizer.tokenize(intent);
         const inputTensor = Bn([tokens]);
         const predictionTensor = this.model.predict(inputTensor);
@@ -23708,13 +23736,13 @@
             var _a2;
             tn(inputTensor);
             const confidence = predictions[0];
-            return confidence > (_a2 = storage5.predictionThreshold, _a2 !== null && _a2 !== void 0 ? _a2 : 0.5);
+            return confidence > ((_a2 = storage5.predictionThreshold) !== null && _a2 !== void 0 ? _a2 : 0.5);
           });
         });
       });
     }
     loadModel(modelName) {
-      return __awaiter4(this, void 0, void 0, function* () {
+      return __awaiter5(this, void 0, void 0, function* () {
         console.log("Loading model...");
         const startTime = performance.now();
         const modelDir = chrome.runtime.getURL("res/models/" + modelName + "/model.json");
@@ -23729,15 +23757,6 @@
   };
 
   // build/context_menus.js
-  var context_menus_default = () => {
-    var setupBefore = false;
-    return () => {
-      if (!setupBefore) {
-        setupBefore = true;
-        createContextMenus();
-      }
-    };
-  };
   function createContextMenus() {
     chrome.contextMenus.create({
       id: "baAddToFilterList",
@@ -23776,51 +23795,61 @@
   }
 
   // build/badge.js
-  var badgeUpdateCounter = window.setInterval(badgeCountDown, 1e3);
-  function setBadgeUpdate() {
-    badgeUpdateCounter = window.setInterval(badgeCountDown, 1e3);
+  var alarmNamePrefix = "refreshBadgeAlarm:";
+  function setBadgeUpdate(domain) {
+    chrome.alarms.create(alarmNamePrefix + domain, {
+      when: Date.now() + 1e3,
+      periodInMinutes: 1,
+      persistAcrossSessions: true
+    }).then(() => {
+      console.log("created");
+    });
   }
-  function cleanupBadge() {
-    window.clearInterval(badgeUpdateCounter);
-    chrome.browserAction.setBadgeText({
+  function cancelBadgeRefreshAlarm(domain) {
+    let wasCleared = chrome.alarms.clear(alarmNamePrefix + domain);
+    wasCleared.then((wasCleared2) => {
+      console.log("clear: " + domain + " " + wasCleared2);
+    });
+  }
+  function clearBadgeText() {
+    chrome.action.setBadgeText({
       text: ""
     });
   }
-  function badgeCountDown() {
+  function refreshBadge() {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       const urls = tabs.map((x2) => x2.url);
       const domain = cleanDomain(urls);
       if (domain === "") {
-        cleanupBadge();
+        clearBadgeText();
         return;
       }
       getStorage().then((storage5) => {
+        if (!storage5.isEnabled) {
+          clearBadgeText();
+          return;
+        }
         if (storage5.whitelistedSites.hasOwnProperty(domain)) {
           const expiry = new Date(storage5.whitelistedSites[domain]);
           const currentDate = new Date();
           const timeDifference = expiry.getTime() - currentDate.getTime();
-          setBadge(timeDifference);
+          setBadge(timeDifference, domain);
         } else {
-          cleanupBadge();
+          clearBadgeText();
         }
       });
     });
   }
-  function setBadge(time) {
+  function setBadge(time, domain) {
     time = Math.round(time / 1e3);
     if (time <= 0) {
-      cleanupBadge();
+      cancelBadgeRefreshAlarm(domain);
+      clearBadgeText();
     } else {
-      if (time > 60) {
-        const min = Math.round(time / 60);
-        chrome.browserAction.setBadgeText({
-          text: min.toString() + "m"
-        });
-      } else {
-        chrome.browserAction.setBadgeText({
-          text: time.toString() + "s"
-        });
-      }
+      const min = Math.ceil(time / 60);
+      chrome.action.setBadgeText({
+        text: "<" + min.toString() + "m"
+      });
     }
   }
 
@@ -23838,7 +23867,7 @@
   }
 
   // build/background.js
-  var __awaiter5 = function(thisArg, _arguments, P2, generator) {
+  var __awaiter6 = function(thisArg, _arguments, P2, generator) {
     function adopt(value) {
       return value instanceof P2 ? value : new P2(function(resolve) {
         resolve(value);
@@ -23873,6 +23902,7 @@
       });
       firstTimeSetup();
     }
+    createContextMenus();
     const prevVersion = details.previousVersion;
     const thisVersion = chrome.runtime.getManifest().version;
     if (details.reason === "update") {
@@ -23886,6 +23916,38 @@
       }
     }
     chrome.runtime.setUninstallURL("http://getreflect.app/uninstall");
+  });
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name.startsWith(alarmNamePrefix)) {
+      const domain = alarm.name.slice(alarmNamePrefix.length);
+      getStorage().then((storage5) => {
+        if (storage5.whitelistedSites.hasOwnProperty(domain)) {
+          const expiry = new Date(storage5.whitelistedSites[domain]);
+          const currentDate = new Date();
+          const timeDifference = expiry.getTime() - currentDate.getTime();
+          if (timeDifference <= 0) {
+            cancelBadgeRefreshAlarm(domain);
+          }
+        }
+      });
+      refreshBadge();
+    }
+  });
+  chrome.tabs.onActivated.addListener(() => {
+    refreshBadge();
+  });
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+    if (tab.active && changeInfo.url) {
+      refreshBadge();
+    }
+  });
+  chrome.windows.onFocusChanged.addListener(() => {
+    refreshBadge();
+  });
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName == "sync" && (changes.whitelistedSites || changes.isEnabled)) {
+      refreshBadge();
+    }
   });
   function firstTimeSetup() {
     turnFilteringOn();
@@ -23907,7 +23969,7 @@
     }).then(() => {
       console.log("Default values have been set.");
     });
-    chrome.browserAction.setBadgeBackgroundColor({
+    chrome.action.setBadgeBackgroundColor({
       color: "#576ca8"
     });
   }
@@ -23919,13 +23981,12 @@
       } else if (!storage5.isEnabled) {
         icon = "res/off.png";
       }
-      chrome.browserAction.setIcon({path: {"16": icon}});
+      chrome.action.setIcon({path: {"16": icon}});
     });
   });
   function turnFilteringOff() {
     setStorage({isEnabled: false}).then(() => {
-      cleanupBadge();
-      chrome.browserAction.setIcon({path: "res/off.png"}, () => {
+      chrome.action.setIcon({path: "res/off.png"}, () => {
         console.log("Filtering disabled");
       });
       reloadActive();
@@ -23933,8 +23994,7 @@
   }
   function turnFilteringOn() {
     setStorage({isEnabled: true}).then(() => {
-      setBadgeUpdate();
-      chrome.browserAction.setIcon({path: "res/on.png"}, () => {
+      chrome.action.setIcon({path: "res/on.png"}, () => {
         console.log("Filtering enabled.");
       });
       reloadActive();
@@ -23972,7 +24032,6 @@
         break;
     }
   });
-  context_menus_default();
   var model = new IntentClassifier("acc85.95");
   chrome.runtime.onConnect.addListener((port) => {
     switch (port.name) {
@@ -23988,13 +24047,13 @@
     }
   });
   function intentHandler(port, msg) {
-    return __awaiter5(this, void 0, void 0, function* () {
+    return __awaiter6(this, void 0, void 0, function* () {
       const intent = msg.intent;
-      getStorage().then((storage5) => __awaiter5(this, void 0, void 0, function* () {
+      getStorage().then((storage5) => __awaiter6(this, void 0, void 0, function* () {
         var _a2;
         const WHITELIST_PERIOD = storage5.whitelistTime;
         const words = intent.split(" ");
-        if (words.length <= (_a2 = storage5.minIntentLength, _a2 !== null && _a2 !== void 0 ? _a2 : 3)) {
+        if (words.length <= ((_a2 = storage5.minIntentLength) !== null && _a2 !== void 0 ? _a2 : 3)) {
           port.postMessage({status: "too_short"});
           return;
         }
@@ -24007,7 +24066,9 @@
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
           const urls = tabs.map((x2) => x2.url);
           const domain = cleanDomain(urls);
-          addToWhitelist(domain, WHITELIST_PERIOD);
+          addToWhitelist(domain, WHITELIST_PERIOD).then(() => {
+            setBadgeUpdate(domain);
+          });
         });
         port.postMessage({status: "ok"});
         console.log(`Success! Redirecting`);

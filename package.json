@@ -6,11 +6,11 @@
     "dependencies": {
         "@tensorflow/tfjs": "^1.7.2",
         "@tensorflow/tfjs-node": "^1.7.2",
-        "@types/chrome": "0.0.92",
+        "@types/chrome": "0.2.8",
         "@types/jquery": "^3.3.31",
         "@types/jqueryui": "^1.12.10",
         "esbuild": "^0.8.26",
-        "typescript": "^3.7.5"
+        "typescript": "^5.6.3"
     },
     "scripts": {
         "copy": "cp build/*.js dist/src/",

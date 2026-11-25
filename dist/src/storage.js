@@ -1,5 +1,14 @@
 // storage.ts provides a thin wrapper around the chrome storage api to make it easier to read/write from it
 // you can also find helper functions that read/write to chrome storage
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { addMinutes } from './util';
 // helper function to retrive chrome storage object
 // usage:
@@ -63,12 +72,13 @@ export function removeFromBlocked(url) {
 // Add a single url to whitelist with associated whitelist duration
 // (replaces any existing entries)
 export function addToWhitelist(url, minutes) {
-    getStorage().then((storage) => {
-        let whitelistedSites = storage.whitelistedSites;
-        let expiry = addMinutes(new Date(), minutes);
-        whitelistedSites[url] = expiry.toJSON();
-        setStorage({ whitelistedSites: whitelistedSites }).then(() => {
+    return __awaiter(this, void 0, void 0, function* () {
+        return getStorage().then((storage) => {
+            let whitelistedSites = storage.whitelistedSites;
+            let expiry = addMinutes(new Date(), minutes);
+            whitelistedSites[url] = expiry.toJSON();
             console.log(`${url} added to whitelisted sites`);
+            return setStorage({ whitelistedSites: whitelistedSites });
         });
     });
 }

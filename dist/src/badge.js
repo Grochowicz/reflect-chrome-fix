@@ -1,55 +1,60 @@
 // badge.ts is a module responsible for controlling the badge that displays whitelist time left
 import { cleanDomain } from './util';
 import { getStorage } from './storage';
-var badgeUpdateCounter = window.setInterval(badgeCountDown, 1000);
-export function setBadgeUpdate() {
-    badgeUpdateCounter = window.setInterval(badgeCountDown, 1000);
+export const alarmNamePrefix = 'refreshBadgeAlarm:';
+export function setBadgeUpdate(domain) {
+    chrome.alarms.create(alarmNamePrefix + domain, {
+        when: Date.now() + 1000,
+        periodInMinutes: 1,
+        persistAcrossSessions: true
+    }).then(() => { console.log('created'); });
 }
-export function cleanupBadge() {
-    window.clearInterval(badgeUpdateCounter);
-    chrome.browserAction.setBadgeText({
+export function cancelBadgeRefreshAlarm(domain) {
+    let wasCleared = chrome.alarms.clear(alarmNamePrefix + domain);
+    wasCleared.then((wasCleared) => { console.log('clear: ' + domain + " " + wasCleared); });
+}
+function clearBadgeText() {
+    chrome.action.setBadgeText({
         text: '',
     });
 }
-function badgeCountDown() {
+export function refreshBadge() {
     // get current active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const urls = tabs.map((x) => x.url);
         const domain = cleanDomain(urls);
         if (domain === '') {
-            cleanupBadge();
+            clearBadgeText();
             return;
         }
         // get whitelisted sites
         getStorage().then((storage) => {
+            if (!storage.isEnabled) {
+                clearBadgeText();
+                return;
+            }
             if (storage.whitelistedSites.hasOwnProperty(domain)) {
                 const expiry = new Date(storage.whitelistedSites[domain]);
                 const currentDate = new Date();
                 const timeDifference = expiry.getTime() - currentDate.getTime();
-                setBadge(timeDifference);
+                setBadge(timeDifference, domain);
             }
             else {
-                cleanupBadge();
+                clearBadgeText();
             }
         });
     });
 }
-function setBadge(time) {
+function setBadge(time, domain) {
     time = Math.round(time / 1000);
     if (time <= 0) {
-        cleanupBadge();
+        cancelBadgeRefreshAlarm(domain);
+        clearBadgeText();
     }
     else {
-        if (time > 60) {
-            const min = Math.round(time / 60);
-            chrome.browserAction.setBadgeText({
-                text: min.toString() + 'm',
-            });
-        }
-        else {
-            chrome.browserAction.setBadgeText({
-                text: time.toString() + 's',
-            });
-        }
+        const min = Math.ceil(time / 60);
+        chrome.action.setBadgeText({
+            text: '<' + min.toString() + 'm',
+        });
     }
 }

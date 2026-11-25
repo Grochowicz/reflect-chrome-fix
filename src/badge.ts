@@ -2,59 +2,72 @@
 import { cleanDomain } from './util'
 import { getStorage } from './storage'
 
-var badgeUpdateCounter: number = window.setInterval(badgeCountDown, 1000)
+export const alarmNamePrefix: string = 'refreshBadgeAlarm:'
 
-export function setBadgeUpdate() {
-  badgeUpdateCounter = window.setInterval(badgeCountDown, 1000)
+export function setBadgeUpdate(domain: string) {
+  chrome.alarms
+    .create(alarmNamePrefix + domain, {
+      when: Date.now() + 1000,
+      periodInMinutes: 1,
+      persistAcrossSessions: true,
+    })
+    .then(() => {
+      console.log('created alarm for ' + domain)
+    })
 }
 
-export function cleanupBadge(): void {
-  window.clearInterval(badgeUpdateCounter)
-  chrome.browserAction.setBadgeText({
+export function cancelBadgeRefreshAlarm(domain): void {
+  let wasCleared: Promise<boolean> = chrome.alarms.clear(alarmNamePrefix + domain)
+  wasCleared.then((wasCleared) => {
+    console.log('clear: ' + domain + ' alarm clear attempt:' + wasCleared)
+  })
+}
+
+function clearBadgeText(): void {
+  chrome.action.setBadgeText({
     text: '',
   })
 }
 
-function badgeCountDown(): void {
+export function refreshBadge(): void {
   // get current active tab
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const urls: string[] = tabs.map((x) => x.url)
     const domain: string = cleanDomain(urls)
 
     if (domain === '') {
-      cleanupBadge()
+      clearBadgeText()
       return
     }
 
     // get whitelisted sites
     getStorage().then((storage) => {
+      if (!storage.isEnabled) {
+        clearBadgeText()
+        return
+      }
+
       if (storage.whitelistedSites.hasOwnProperty(domain)) {
         const expiry: Date = new Date(storage.whitelistedSites[domain])
         const currentDate: Date = new Date()
         const timeDifference: number = expiry.getTime() - currentDate.getTime()
 
-        setBadge(timeDifference)
+        setBadge(timeDifference, domain)
       } else {
-        cleanupBadge()
+        clearBadgeText()
       }
     })
   })
 }
 
-function setBadge(time: number) {
+function setBadge(time: number, domain: string) {
   time = Math.round(time / 1000)
   if (time <= 0) {
-    cleanupBadge()
+    clearBadgeText()
   } else {
-    if (time > 60) {
-      const min: number = Math.round(time / 60)
-      chrome.browserAction.setBadgeText({
-        text: min.toString() + 'm',
-      })
-    } else {
-      chrome.browserAction.setBadgeText({
-        text: time.toString() + 's',
-      })
-    }
+    const min: number = Math.ceil(time / 60)
+    chrome.action.setBadgeText({
+      text: '<' + min.toString() + 'm',
+    })
   }
 }

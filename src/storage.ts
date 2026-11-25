@@ -67,15 +67,14 @@ export function removeFromBlocked(url: string): void {
 
 // Add a single url to whitelist with associated whitelist duration
 // (replaces any existing entries)
-export function addToWhitelist(url: string, minutes: number): void {
-  getStorage().then((storage) => {
+export async function addToWhitelist(url: string, minutes: number): Promise<void> {
+  return getStorage().then((storage) => {
     let whitelistedSites: { [key: string]: string } = storage.whitelistedSites
     let expiry: Date = addMinutes(new Date(), minutes)
     whitelistedSites[url] = expiry.toJSON()
 
-    setStorage({ whitelistedSites: whitelistedSites }).then(() => {
-      console.log(`${url} added to whitelisted sites`)
-    })
+    console.log(`${url} added to whitelisted sites`)
+    return setStorage({ whitelistedSites: whitelistedSites })
   })
 }
 

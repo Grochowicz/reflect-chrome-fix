@@ -230,8 +230,8 @@
       getStorage().then((storage3) => {
         var _a, _b;
         getElementFromForm("whitelistTime").value = storage3.whitelistTime;
-        getElementFromForm("enableBlobs").checked = (_a = storage3.enableBlobs, _a !== null && _a !== void 0 ? _a : true);
-        getElementFromForm("enable3D").checked = (_b = storage3.enable3D, _b !== null && _b !== void 0 ? _b : true);
+        getElementFromForm("enableBlobs").checked = (_a = storage3.enableBlobs) !== null && _a !== void 0 ? _a : true;
+        getElementFromForm("enable3D").checked = (_b = storage3.enable3D) !== null && _b !== void 0 ? _b : true;
       });
       const optionsDiv = document.getElementById("options");
       const goToEndButton = document.getElementById("page3button");
@@ -271,7 +271,7 @@
       const strippedURL = getStrippedUrl();
       const exactURL = cleanDomain([window.location.href], true);
       storage3.blockedSites.forEach((site) => {
-        if ((!strippedURL.includes(`.${site}`) && strippedURL.includes(site) || exactURL.includes(site)) && !isWhitelistedWrapper()) {
+        if ((!strippedURL.includes(`.${site}`) && strippedURL.includes(site) || exactURL === site) && !isWhitelistedWrapper()) {
           iterWhitelist();
         }
       });
@@ -324,8 +324,8 @@
         $("html").html(page);
         addFormListener(strippedURL);
         $("#linkToOptions").attr("href", options_page_url);
-        if (_a = storage3.enableBlobs, _a !== null && _a !== void 0 ? _a : true) {
-          const anim = new blob_animation_default((_b = storage3.enable3D, _b !== null && _b !== void 0 ? _b : true));
+        if ((_a = storage3.enableBlobs) !== null && _a !== void 0 ? _a : true) {
+          const anim = new blob_animation_default((_b = storage3.enable3D) !== null && _b !== void 0 ? _b : true);
           anim.animate();
         }
         const welcome = document.getElementById("customMessageContent");
@@ -334,13 +334,11 @@
     });
   }
   function addFormListener(strippedURL) {
-    var _a;
     const form = document.forms.namedItem("inputForm");
     const button = document.getElementById("submitButton");
-    (_a = form) === null || _a === void 0 ? void 0 : _a.addEventListener("submit", (event) => {
-      var _a2;
+    form === null || form === void 0 ? void 0 : form.addEventListener("submit", (event) => {
       event.preventDefault();
-      (_a2 = button) === null || _a2 === void 0 ? void 0 : _a2.setAttribute("disabled", "disabled");
+      button === null || button === void 0 ? void 0 : button.setAttribute("disabled", "disabled");
       const intentForm = event.target;
       const intent = new FormData(intentForm).get("intent");
       const intentString = intent.toString();
@@ -353,7 +351,6 @@
     });
     port.postMessage({intent, url: window.location.href});
     port.onMessage.addListener((msg) => {
-      var _a;
       switch (msg.status) {
         case "ok":
           getStorage().then((storage3) => {
@@ -370,7 +367,7 @@
           break;
       }
       const button = document.getElementById("submitButton");
-      (_a = button) === null || _a === void 0 ? void 0 : _a.removeAttribute("disabled");
+      button === null || button === void 0 ? void 0 : button.removeAttribute("disabled");
       const accepted = msg.status === "ok" ? "yes" : "no";
       const intentDate = new Date();
       logIntentToStorage(intent, intentDate, url, accepted);

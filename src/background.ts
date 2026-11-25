@@ -1,9 +1,9 @@
 import * as nn from './nn'
 import { cleanDomain } from './util'
 import { getStorage, setStorage, addToBlocked, addToWhitelist, removeFromBlocked } from './storage'
-import setupContextMenus from './context_menus'
+import { createContextMenus } from './context_menus'
 import { Intent } from './types'
-import { setBadgeUpdate, cleanupBadge } from './badge'
+import { alarmNamePrefix, setBadgeUpdate, cancelBadgeRefreshAlarm, refreshBadge } from './badge'
 import { listenForCommand } from './commands'
 
 // On install script
@@ -18,6 +18,9 @@ chrome.runtime.onInstalled.addListener((details) => {
 
     firstTimeSetup()
   }
+
+  // create context menus
+  createContextMenus()
 
   // on version update
   const prevVersion: string = details.previousVersion
@@ -38,6 +41,46 @@ chrome.runtime.onInstalled.addListener((details) => {
 
   // set uninstall url
   chrome.runtime.setUninstallURL('http://getreflect.app/uninstall')
+})
+
+// Listen for alarms to update the badge text every minute
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name.startsWith(alarmNamePrefix)) {
+    //clear alarm for some inactive tab if expired
+
+    const domain: string = alarm.name.slice(alarmNamePrefix.length)
+    getStorage().then((storage) => {
+      if (storage.whitelistedSites.hasOwnProperty(domain)) {
+        const expiry: Date = new Date(storage.whitelistedSites[domain])
+        const currentDate: Date = new Date()
+        const timeDifference: number = expiry.getTime() - currentDate.getTime()
+
+        if (timeDifference <= 0) {
+          cancelBadgeRefreshAlarm(domain)
+        }
+      }
+    })
+
+    // refresh badge for active tab timer
+    refreshBadge()
+  }
+})
+// Update badge text when changing tabs, focus, storage
+chrome.tabs.onActivated.addListener(() => {
+  refreshBadge()
+})
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+  if (tab.active && changeInfo.url) {
+    refreshBadge()
+  }
+})
+chrome.windows.onFocusChanged.addListener(() => {
+  refreshBadge()
+})
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName == 'sync' && (changes.whitelistedSites || changes.isEnabled)) {
+    refreshBadge()
+  }
 })
 
 function firstTimeSetup(): void {
@@ -66,7 +109,7 @@ function firstTimeSetup(): void {
   })
 
   // set default badge background colour
-  chrome.browserAction.setBadgeBackgroundColor({
+  chrome.action.setBadgeBackgroundColor({
     color: '#576ca8',
   })
 }
@@ -81,16 +124,13 @@ chrome.runtime.onStartup.addListener(() => {
       icon = 'res/off.png'
     }
 
-    chrome.browserAction.setIcon({ path: { '16': icon } })
+    chrome.action.setIcon({ path: { '16': icon } })
   })
 })
 
 function turnFilteringOff(): void {
   setStorage({ isEnabled: false }).then(() => {
-    // stop checking for badge updates
-    cleanupBadge()
-
-    chrome.browserAction.setIcon({ path: 'res/off.png' }, () => {
+    chrome.action.setIcon({ path: 'res/off.png' }, () => {
       console.log('Filtering disabled')
     })
     reloadActive()
@@ -99,10 +139,7 @@ function turnFilteringOff(): void {
 
 function turnFilteringOn(): void {
   setStorage({ isEnabled: true }).then(() => {
-    // start badge update counter
-    setBadgeUpdate()
-
-    chrome.browserAction.setIcon({ path: 'res/on.png' }, () => {
+    chrome.action.setIcon({ path: 'res/on.png' }, () => {
       console.log('Filtering enabled.')
     })
     reloadActive()
@@ -144,9 +181,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       break
   }
 })
-
-// load context menus
-setupContextMenus()
 
 // Load ML model
 const model: nn.IntentClassifier = new nn.IntentClassifier('acc85.95')
@@ -201,7 +235,9 @@ async function intentHandler(port: chrome.runtime.Port, msg) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const urls: string[] = tabs.map((x) => x.url)
       const domain: string = cleanDomain(urls)
-      addToWhitelist(domain, WHITELIST_PERIOD)
+      addToWhitelist(domain, WHITELIST_PERIOD).then(() => {
+        setBadgeUpdate(domain)
+      })
     })
 
     // send status to tab

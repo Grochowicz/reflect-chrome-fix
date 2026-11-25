@@ -71,10 +71,10 @@
       var _a, _b, _c;
       getElementFromForm("whitelistTime").value = storage2.whitelistTime;
       getElementFromForm("numIntentEntries").value = storage2.numIntentEntries;
-      getElementFromForm("minIntentLength").value = (_a = storage2.minIntentLength, _a !== null && _a !== void 0 ? _a : 3);
+      getElementFromForm("minIntentLength").value = (_a = storage2.minIntentLength) !== null && _a !== void 0 ? _a : 3;
       getElementFromForm("customMessage").value = storage2.customMessage || "";
-      getElementFromForm("enableBlobs").checked = (_b = storage2.enableBlobs, _b !== null && _b !== void 0 ? _b : true);
-      getElementFromForm("enable3D").checked = (_c = storage2.enable3D, _c !== null && _c !== void 0 ? _c : true);
+      getElementFromForm("enableBlobs").checked = (_b = storage2.enableBlobs) !== null && _b !== void 0 ? _b : true;
+      getElementFromForm("enable3D").checked = (_c = storage2.enable3D) !== null && _c !== void 0 ? _c : true;
       getElementFromForm("thresholdSlider").value = storage2.predictionThreshold || 0.5;
       display.innerHTML = sliderToValue(slider);
     });
