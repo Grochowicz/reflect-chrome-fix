@@ -3,15 +3,21 @@ import { cleanDomain } from './util';
 import { getStorage } from './storage';
 export const alarmNamePrefix = 'refreshBadgeAlarm:';
 export function setBadgeUpdate(domain) {
-    chrome.alarms.create(alarmNamePrefix + domain, {
+    chrome.alarms
+        .create(alarmNamePrefix + domain, {
         when: Date.now() + 1000,
         periodInMinutes: 1,
-        persistAcrossSessions: true
-    }).then(() => { console.log('created'); });
+        persistAcrossSessions: true,
+    })
+        .then(() => {
+        console.log('created alarm for ' + domain);
+    });
 }
 export function cancelBadgeRefreshAlarm(domain) {
     let wasCleared = chrome.alarms.clear(alarmNamePrefix + domain);
-    wasCleared.then((wasCleared) => { console.log('clear: ' + domain + " " + wasCleared); });
+    wasCleared.then((wasCleared) => {
+        console.log('clear: ' + domain + ' alarm clear attempt:' + wasCleared);
+    });
 }
 function clearBadgeText() {
     chrome.action.setBadgeText({
@@ -48,7 +54,6 @@ export function refreshBadge() {
 function setBadge(time, domain) {
     time = Math.round(time / 1000);
     if (time <= 0) {
-        cancelBadgeRefreshAlarm(domain);
         clearBadgeText();
     }
     else {
