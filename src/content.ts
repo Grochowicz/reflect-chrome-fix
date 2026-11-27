@@ -1,7 +1,8 @@
 import BlobAnimation from './blob_animation'
 import { getStorage, logIntentToStorage } from './storage'
-import { cleanDomain } from './util'
 import injectOptionsToOnboarding from './onboarding_options'
+import { cleanDomain } from './util'
+import { shouldBlockURL } from './block_check'
 
 // some constants
 const REFLECT_INFO: string = '#576ca8'
@@ -36,17 +37,9 @@ function checkIfBlocked(): void {
       return
     }
 
-    const strippedURL: string = getStrippedUrl()
-    const exactURL: string = cleanDomain([window.location.href], true)
-
     // match current url against stored blocklist
     storage.blockedSites.forEach((site: string) => {
-      // if google.com is blocked, meet.google.com includes .google.com --> meet.google.com is not blocked
-      // conversely if meet.google.com is blocked, google.com does not include meet.google.com --> google.com is not blocked
-      if (
-        ((!strippedURL.includes(`.${site}`) && strippedURL.includes(site)) || exactURL === site) &&
-        !isWhitelistedWrapper()
-      ) {
+      if (shouldBlockURL(window.location.href, site)) {
         // found a match, check if currently on whitelist
         iterWhitelist()
       }
@@ -63,12 +56,6 @@ function displayStatus(
   $('#statusContent').css('color', colour)
   $('#statusContent').text(message)
   $('#statusContent').show().delay(duration).fadeOut()
-}
-
-// check to see if domain is whitelisted
-function isWhitelistedWrapper(): boolean {
-  const WHITELISTED_WRAPPERS: string[] = ['facebook.com/flx', 'l.facebook.com']
-  return WHITELISTED_WRAPPERS.some((wrapper) => window.location.href.includes(wrapper))
 }
 
 // thin wrapper around util.ts/cleanDomain

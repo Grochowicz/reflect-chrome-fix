@@ -17,7 +17,9 @@
         "esbuild": "esbuild build/background.js build/content.js build/popup.js build/options.js --minify --bundle --outdir=dist/src",
         "dev": "esbuild build/background.js build/content.js build/popup.js build/options.js --sourcemap --bundle --outdir=dist/src",
         "watch": "nodemon -e ts -x \"npm run build\"",
-        "clean": "rm dist/src/*"
+        "clean": "rm dist/src/*",
+		"test": "vitest run",
+		"test:watch": "vitest"
     },
     "devDependencies": {
         "babel-plugin-transform-runtime": "^6.23.0",
@@ -25,7 +27,8 @@
         "husky": "^4.2.5",
         "nodemon": "3.1.11",
         "prettier": "^2.0.5",
-        "pretty-quick": "^2.0.1"
+        "pretty-quick": "^2.0.1",
+        "vitest": "^5.1.2"
     },
     "husky": {
         "hooks": {
