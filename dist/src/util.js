@@ -2,7 +2,7 @@
 export function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes * 60000);
 }
-export function cleanDomain(url, exact = false) {
+export function cleanDomain(url, exact = false, user_input = false) {
     // check to see if urls exist
     if (url === undefined) {
         // return empty if not
@@ -10,14 +10,25 @@ export function cleanDomain(url, exact = false) {
     }
     else {
         // regex match for url
-        const activeURL = url.match(exact ? /^[\w]+:\/{2}([^#?]+)/ : /^[\w]+:\/{2}([\w\.:-]+)/);
+        // this will match any scheme that goes like scheme://
+        const https = user_input ? /(^[\w]+:\/{2})?/ : /(^[\w]+:\/{2})/;
+        // this will match the likes of www.google.com/search or www.google.com/
+        const domain = exact ? /([^#?]+)/ : /([\w\.:-]+)/;
+        const activeURL = url.match(new RegExp(https.source + domain.source)
+        // exact ? /^[\w]+:\/{2}([^#?]+)/ : /^[\w]+:\/{2}([\w\.:-]+)/
+        );
         // no matching sites, return empty
         if (activeURL == null) {
             return '';
         }
         else {
-            // strip www.
-            return activeURL[1].replace('www.', '');
+            if (activeURL[2].startsWith('www.')) {
+                // strip www.
+                return activeURL[2].replace('www.', '');
+            }
+            else {
+                return activeURL[2];
+            }
         }
     }
 }

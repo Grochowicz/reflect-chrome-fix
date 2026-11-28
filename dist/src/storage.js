@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { addMinutes } from './util';
+import { addMinutes, cleanDomain } from './util';
 // helper function to retrive chrome storage object
 // usage:
 //
@@ -48,6 +48,7 @@ export function setStorage(key) {
 }
 // Add a single url to blocklist (does nothing if url is already in list)
 export function addToBlocked(url, callback) {
+    url = cleanDomain(url, true, true);
     getStorage().then((storage) => {
         // url = cleanDomain(url) === '' ? url : cleanDomain(url)
         if (!storage.blockedSites.includes(url)) {
