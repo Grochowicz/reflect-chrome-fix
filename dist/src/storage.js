@@ -50,7 +50,7 @@ export function setStorage(key) {
 export function addToBlocked(url, callback) {
     url = cleanDomain(url, true, true);
     if (url == '') {
-        callback ? callback("invalid URL") : () => { };
+        callback ? callback('invalid URL') : () => { };
         return;
     }
     getStorage().then((storage) => {
@@ -63,7 +63,7 @@ export function addToBlocked(url, callback) {
             });
         }
         else {
-            callback ? callback(url + " already in blocklist") : () => { };
+            callback ? callback(url + ' already in blocklist') : () => { };
         }
     });
 }

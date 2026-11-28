@@ -3,8 +3,8 @@ export function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes * 60000);
 }
 export function cleanDomain(url, exact = false, user_input = false) {
-    // check to see if urls exist or include spaces
-    if (url === undefined || url.includes(' ')) {
+    // check to see if urls exist or include spaces or <>
+    if (url === undefined || url.match(/[\s<>]/)) {
         // return empty if not
         return '';
     }

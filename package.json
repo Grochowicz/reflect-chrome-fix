@@ -1,48 +1,42 @@
 {
-    "name": "reflect",
-    "version": "1.4.0",
-    "description": "",
-    "main": "blocker/background.js",
-    "dependencies": {
-        "@tensorflow/tfjs": "^4.22.0",
-        "@types/chrome": "0.2.8",
-        "@types/jquery": "^3.3.31",
-        "@types/jqueryui": "^1.12.10",
-        "esbuild": "^0.28.2",
-        "typescript": "^5.6.3"
-    },
-    "scripts": {
-        "copy": "cp build/*.js dist/src/",
-        "build": "tsc && npm run copy && npm run esbuild",
-        "esbuild": "esbuild build/background.js build/content.js build/popup.js build/options.js --minify --bundle --outdir=dist/src",
-        "dev": "esbuild build/background.js build/content.js build/popup.js build/options.js --sourcemap --bundle --outdir=dist/src",
-        "watch": "nodemon -e ts -x \"npm run build\"",
-        "clean": "rm dist/src/*",
-		"test": "vitest run",
-		"test:watch": "vitest"
-    },
-    "devDependencies": {
-        "babel-plugin-transform-runtime": "^6.23.0",
-        "clang-format": "^1.2.3",
-        "husky": "^4.2.5",
-        "nodemon": "3.1.11",
-        "prettier": "^2.0.5",
-        "pretty-quick": "^2.0.1",
-        "vitest": "^5.1.2"
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "pretty-quick --staged --pattern '**/*.ts'"
-        }
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/getreflect/reflect-chrome.git"
-    },
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/getreflect/reflect-chrome/issues"
-    },
-    "homepage": "https://github.com/getreflect/reflect-chrome#readme"
+  "name": "reflect",
+  "version": "1.4.0",
+  "description": "",
+  "main": "blocker/background.js",
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "@types/chrome": "0.3.9",
+    "@types/jquery": "3.5.34",
+    "@types/jqueryui": "1.12.26",
+    "esbuild": "^0.28.2",
+    "typescript": "7.0.2"
+  },
+  "scripts": {
+    "copy": "cp build/*.js dist/src/",
+    "build": "tsc && npm run copy && npm run esbuild",
+    "esbuild": "esbuild build/background.js build/content.js build/popup.js build/options.js --minify --bundle --outdir=dist/src",
+    "dev": "esbuild build/background.js build/content.js build/popup.js build/options.js --sourcemap --bundle --outdir=dist/src",
+    "watch": "nodemon -e ts -x \"npm run build\"",
+    "clean": "rm dist/src/*",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "9.1.7",
+    "nodemon": "3.1.11",
+    "prettier": "3.10.1",
+    "pretty-quick": "4.2.2",
+    "vitest": "^5.1.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getreflect/reflect-chrome.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/getreflect/reflect-chrome/issues"
+  },
+  "homepage": "https://github.com/getreflect/reflect-chrome#readme"
 }
