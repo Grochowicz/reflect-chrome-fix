@@ -60,7 +60,7 @@ function displayStatus(
 
 // thin wrapper around util.ts/cleanDomain
 function getStrippedUrl(): string {
-  return cleanDomain([window.location.href])
+  return cleanDomain(window.location.href)
 }
 
 function iterWhitelist(): void {

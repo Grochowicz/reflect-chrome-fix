@@ -37,9 +37,8 @@ function updateButton(unblock: boolean) {
 // setup listener for what block button should do
 function setupBlockListener(blockedSites: string[]) {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const urls: string[] = tabs.map((x) => x.url)
-    const domain: string = cleanDomain(urls)
-    const url: string = cleanDomain(urls, true)
+    const domain: string = cleanDomain(tabs[0]?.url, false)
+    const url: string = cleanDomain(tabs[0]?.url, true)
 
     // not on a page (probably new tab)
     if (domain === '') {

@@ -150,7 +150,7 @@ function turnFilteringOn(): void {
 function reloadActive(): void {
   getStorage().then((storage) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentUrl = cleanDomain(tabs.map((tab) => tab.url))
+      const currentUrl = cleanDomain(tabs[0]?.url)
       if (storage.blockedSites.includes(currentUrl)) {
         chrome.tabs.reload(tabs[0].id)
       }
@@ -175,7 +175,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     case 'pgAddDomainToFilterList':
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const urls: string[] = tabs.map((x) => x.url)
-        const domain: string = cleanDomain(urls)
+        const domain: string = cleanDomain(urls[0])
         addToBlocked(domain)
       })
       break
@@ -234,7 +234,7 @@ async function intentHandler(port: chrome.runtime.Port, msg) {
     // add whitelist period for site
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const urls: string[] = tabs.map((x) => x.url)
-      const domain: string = cleanDomain(urls)
+      const domain: string = cleanDomain(urls[0])
       addToWhitelist(domain, WHITELIST_PERIOD).then(() => {
         setBadgeUpdate(domain)
       })

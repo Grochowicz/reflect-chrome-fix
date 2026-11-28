@@ -43,7 +43,7 @@ export function setStorage(key: Storage): Promise<void> {
 // Add a single url to blocklist (does nothing if url is already in list)
 export function addToBlocked(url: string, callback?: () => any): void {
   getStorage().then((storage) => {
-    // url = cleanDomain([url]) === '' ? url : cleanDomain([url])
+    // url = cleanDomain(url) === '' ? url : cleanDomain(url)
     if (!storage.blockedSites.includes(url)) {
       storage.blockedSites.push(url)
       setStorage({ blockedSites: storage.blockedSites }).then(() => {
@@ -73,7 +73,6 @@ export async function addToWhitelist(url: string, minutes: number): Promise<void
     let expiry: Date = addMinutes(new Date(), minutes)
     whitelistedSites[url] = expiry.toJSON()
 
-    console.log(`${url} added to whitelisted sites`)
     return setStorage({ whitelistedSites: whitelistedSites })
   })
 }

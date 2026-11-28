@@ -49,7 +49,7 @@ export function setStorage(key) {
 // Add a single url to blocklist (does nothing if url is already in list)
 export function addToBlocked(url, callback) {
     getStorage().then((storage) => {
-        // url = cleanDomain([url]) === '' ? url : cleanDomain([url])
+        // url = cleanDomain(url) === '' ? url : cleanDomain(url)
         if (!storage.blockedSites.includes(url)) {
             storage.blockedSites.push(url);
             setStorage({ blockedSites: storage.blockedSites }).then(() => {
@@ -77,7 +77,6 @@ export function addToWhitelist(url, minutes) {
             let whitelistedSites = storage.whitelistedSites;
             let expiry = addMinutes(new Date(), minutes);
             whitelistedSites[url] = expiry.toJSON();
-            console.log(`${url} added to whitelisted sites`);
             return setStorage({ whitelistedSites: whitelistedSites });
         });
     });

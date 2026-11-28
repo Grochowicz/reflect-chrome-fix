@@ -33,7 +33,7 @@ export function refreshBadge(): void {
   // get current active tab
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const urls: string[] = tabs.map((x) => x.url)
-    const domain: string = cleanDomain(urls)
+    const domain: string = cleanDomain(urls[0])
 
     if (domain === '') {
       clearBadgeText()
