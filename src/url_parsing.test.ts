@@ -60,4 +60,7 @@ describe('cleanDomain', () => {
   test('user input no www, with https', () => {
     expect(cleanDomain('https://google.com', true, true)).toBe('google.com')
   })
+  test('user input with html (displays badly in options page!)', () => {
+    expect(cleanDomain('<div>google.com</div>', true, true)).toBe('')
+  })
 })

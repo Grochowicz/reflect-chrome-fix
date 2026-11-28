@@ -49,14 +49,21 @@ export function setStorage(key) {
 // Add a single url to blocklist (does nothing if url is already in list)
 export function addToBlocked(url, callback) {
     url = cleanDomain(url, true, true);
+    if (url == '') {
+        callback ? callback("invalid URL") : () => { };
+        return;
+    }
     getStorage().then((storage) => {
         // url = cleanDomain(url) === '' ? url : cleanDomain(url)
         if (!storage.blockedSites.includes(url)) {
             storage.blockedSites.push(url);
             setStorage({ blockedSites: storage.blockedSites }).then(() => {
                 console.log(`${url} added to blocked sites`);
-                callback ? callback() : () => { };
+                callback ? callback('') : () => { };
             });
+        }
+        else {
+            callback ? callback(url + " already in blocklist") : () => { };
         }
     });
 }

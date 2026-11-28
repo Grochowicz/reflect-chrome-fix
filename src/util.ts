@@ -9,8 +9,8 @@ export function cleanDomain(
   exact: boolean = false,
   user_input: boolean = false
 ): string {
-  // check to see if urls exist or include spaces
-  if (url === undefined || url.includes(' ')) {
+  // check to see if urls exist or include spaces or <>
+  if (url === undefined || url.match(/[\s<>]/)) {
     // return empty if not
     return ''
   } else {

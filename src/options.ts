@@ -208,6 +208,13 @@ function setAddButtonListener(): void {
   })
 }
 
+function drawAddUrlFeedback(text: string): void {
+  const elem = document.getElementById('feedback')
+  if (elem != null) {
+    elem.textContent = text
+  }
+}
+
 function addUrlToFilterList(): void {
   // get urlInput
   const urlInput: HTMLFormElement = document.getElementById('urlInput') as HTMLFormElement
@@ -215,9 +222,10 @@ function addUrlToFilterList(): void {
   // see if value is non-empty
   if (urlInput.value !== '') {
     const url: string = urlInput.value
-    addToBlocked(url, () => {
+    addToBlocked(url, (text) => {
       urlInput.value = ''
       drawFilterListTable()
+      drawAddUrlFeedback(text)
     })
   }
 }
