@@ -13,7 +13,7 @@ export function shouldBlockURL(href: string, site: string): boolean {
   // if google.com is blocked, meet.google.com includes .google.com --> meet.google.com is not blocked
   // conversely if meet.google.com is blocked, google.com does not include meet.google.com --> google.com is not blocked
   return (
-    ((!strippedURL.includes(`.${site}`) && strippedURL.includes(site)) || exactURL === site) &&
+    ((!strippedURL.includes(`.${site}`) && strippedURL == site) || exactURL === site) &&
     !isWhitelistedWrapper(href)
   )
 }
